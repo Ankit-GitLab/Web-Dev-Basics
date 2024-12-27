@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: rgb(20, 124, 184);
+            color: #333;
+        }
+        .App {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #ffffff;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #007BFF;
+        }
+        .search-form {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .search-input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 70%;
+        }
+        .search-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #007BFF;
+            color: #ffffff;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        .search-button:hover {
+            background-color: #0056b3;
+        }
+        .weather-details {
+            font-size: 18px;
+            line-height: 1.5;
+        }
+        .weather-details img {
+            width: 50px;
+            height: 50px;
+        }
+        .error-message {
+            margin-top: 10px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="App">
+        <h1>Weather App</h1>
+        <form class="search-form" id="searchForm">
+            <input
+                type="text"
+                placeholder="Enter city name"
+                class="search-input"
+                id="cityInput"
+                value="Patna">
+            <button type="submit" class="search-button">Search</button>
+        </form>
+
+        <p id="loadingMessage" style="display: none;">Loading...</p> 
+        <p id="errorMessage" class="error-message" style="display: none;"></p>
+        <div id="weatherDetails" class="weather-details" style="display: none;"></div>
+    </div>
+
+    <script>
+        const searchForm = document.getElementById('searchForm');
+        const cityInput = document.getElementById('cityInput');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const weatherDetails = document.getElementById('weatherDetails');
+
+        // Add your API key here
+        const API_KEY = "YOUR_API_KEY"; 
+
+        const fetchWeather = async (city) => {
+            try {
+                loadingMessage.style.display = 'block';
+                errorMessage.style.display = 'none';
+                weatherDetails.style.display = 'none';
+
+                const response = await fetch(`https://api.weatherapi.com/v1/current.json?key=0d994b6172ad419ba3852407240912&q=${city}&aqi=no`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch weather data');
+                }
+
+                const data = await response.json();
+                displayWeather(data);
+            } catch (err) {
+                errorMessage.textContent = 'Failed to fetch weather data. Please check the city name or API key.';
+                errorMessage.style.display = 'block';
+            } finally {
+                loadingMessage.style.display = 'none';
+            }
+        };
+
+        const displayWeather = (data) => {
+            weatherDetails.innerHTML = `
+                <h2>Weather in ${data.location.name}, ${data.location.region}</h2>
+                <p><strong>Temperature:</strong> ${data.current.temp_c}°C</p>
+                <p><strong>Condition:</strong> ${data.current.condition.text}</p>
+                <img src="${data.current.condition.icon}" alt="Weather Icon">
+                <p><strong>Humidity:</strong> ${data.current.humidity}%</p>
+                <p><strong>Wind Speed:</strong> ${data.current.wind_kph} km/h</p>
+            `;
+            weatherDetails.style.display = 'block';
+        };
+
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const city = cityInput.value.trim();
+            if (city) {
+                fetchWeather(city);
+            } else {
+                errorMessage.textContent = 'Please enter a city name.';
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        // Fetch weather for default city on load
+        fetchWeather('Patna');
+    </script>
+</body>
+</html>
+
